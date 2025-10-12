@@ -1,8 +1,9 @@
 # Prism3 Core
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![Rust](https://img.shields.io/badge/rust-1.70+-black.svg?logo=rust)](https://www.rust-lang.org)
+[![Rust](https://img.shields.io/badge/rust-1.70+-blue.svg?logo=rust)](https://www.rust-lang.org)
 [![Crates.io](https://img.shields.io/crates/v/prism3-core.svg)](https://crates.io/crates/prism3-core)
+[![English Document](https://img.shields.io/badge/Document-English-blue.svg)](README.md)
 
 为 Prism3 生态系统提供语言级基础工具和数据类型支持的综合性 Rust 工具库。
 
