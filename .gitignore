@@ -62,6 +62,7 @@ node_modules/
 
 # Project specific exclusions
 external/
+.cursor
 .cursor/
 
 # Temporary files
