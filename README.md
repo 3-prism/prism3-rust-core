@@ -1,7 +1,7 @@
 # Prism3 Core
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
-[![Rust](https://img.shields.io/badge/rust-1.70+-orange.svg)](https://www.rust-lang.org)
+[![Rust](https://img.shields.io/badge/rust-1.70+-black.svg?logo=rust)](https://www.rust-lang.org)
 [![Crates.io](https://img.shields.io/crates/v/prism3-core.svg)](https://crates.io/crates/prism3-core)
 
 A comprehensive Rust utility library providing language-level fundamental tools and data type support for the Prism3 ecosystem.
