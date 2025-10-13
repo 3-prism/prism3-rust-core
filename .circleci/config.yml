@@ -1,200 +1,126 @@
 version: 2.1
 
 # ==============================================================================
-# Reusable Executors
-# Define the environment where jobs will run
+# Orbs - Reusable Configuration Packages
+# Using the official CircleCI Rust orb to simplify CI/CD configuration.
+# Documentation: https://circleci.com/developer/orbs/orb/circleci/rust
 # ==============================================================================
-executors:
-  rust-executor:
-    docker:
-      # Official CircleCI Rust image with Rust 1.70+ toolchain
-      - image: cimg/rust:1.70
-    # Set working directory to project root
-    working_directory: ~/repo
-    # Resource allocation: medium = 2 CPU, 4GB RAM
-    # Options: small, medium, large, xlarge
-    resource_class: medium
-
-# ==============================================================================
-# Reusable Commands
-# Define common steps that can be reused across jobs
-# ==============================================================================
-commands:
-  # Restore cached Cargo dependencies to speed up builds
-  restore_cargo_cache:
-    description: "Restore Cargo dependencies cache"
-    steps:
-      - restore_cache:
-          keys:
-            # Try exact match first (based on Cargo.toml checksum)
-            - cargo-{{ checksum "Cargo.toml" }}-v2
-            # Fall back to any cache with same version
-            - cargo-v2
-
-  # Save Cargo dependencies to cache for future builds
-  save_cargo_cache:
-    description: "Save Cargo dependencies cache"
-    steps:
-      - save_cache:
-          # Cache key based on Cargo.toml to invalidate when dependencies change
-          key: cargo-{{ checksum "Cargo.toml" }}-v2
-          paths:
-            # Cargo registry (downloaded crates)
-            - ~/.cargo/registry
-            # Git dependencies
-            - ~/.cargo/git
-            # Build artifacts (compiled dependencies)
-            - target
-
-  # Install required Rust tools for CI
-  install_rust_tools:
-    description: "Install Rust toolchain and required tools"
-    steps:
-      - run:
-          name: Install rustfmt and clippy
-          command: |
-            # rustfmt: Code formatter
-            rustup component add rustfmt
-            # clippy: Linter for common mistakes and improvements
-            rustup component add clippy
-
-      - run:
-          name: Install cargo-llvm-cov
-          command: |
-            # cargo-llvm-cov: Code coverage tool
-            # || true: Don't fail if already installed
-            cargo install cargo-llvm-cov --version 0.5.31 || true
-            # llvm-tools-preview: Required for coverage instrumentation
-            rustup component add llvm-tools-preview
+orbs:
+  rust: circleci/rust@1.8.0
 
 # ==============================================================================
 # Job Definitions
-# Define individual CI/CD tasks
+# Each job represents a collection of steps to be executed in a specific environment.
 # ==============================================================================
 jobs:
   # ------------------------------------------------------------------------------
   # Job: Check Code Formatting
-  # Ensures all code follows Rust formatting standards
+  # Ensures all Rust code adheres to the standard formatting guidelines using `cargo fmt`.
   # ------------------------------------------------------------------------------
   check_format:
-    executor: rust-executor
+    executor:
+      name: rust/default
+      tag: '1.80'
     steps:
-      # Check out source code from repository
       - checkout
       - run:
           name: Check code format
-          command: |
-            # Use rustfmt to check if code is properly formatted
-            # --check: Only check, don't modify files
-            # Fails if any file needs formatting
-            cargo fmt -- --check
+          command: cargo fmt -- --check
 
   # ------------------------------------------------------------------------------
   # Job: Lint Checks
-  # Runs Clippy to catch common mistakes and suggest improvements
+  # Runs `cargo clippy` to catch common mistakes and improve code quality.
+  # Fails on any warnings (`-D warnings`).
   # ------------------------------------------------------------------------------
   lint:
-    executor: rust-executor
+    executor:
+      name: rust/default
+      tag: '1.80'
     steps:
       - checkout
-      # Restore cached dependencies to speed up clippy
-      - restore_cargo_cache
-      - run:
-          name: Install clippy
-          command: rustup component add clippy
+      # Restore cached dependencies to speed up the process
+      - rust/cargo_load_cache
       - run:
           name: Run clippy
-          command: |
-            # Run clippy on all targets (lib, tests, examples, benches)
-            # --all-features: Check with all features enabled
-            # -D warnings: Treat all warnings as errors
-            cargo clippy --all-targets --all-features -- -D warnings
-      # Save cache for future builds
-      - save_cargo_cache
+          command: cargo clippy --all-targets --all-features -- -D warnings
+      # Save cache for future runs
+      - rust/cargo_save_cache
 
   # ------------------------------------------------------------------------------
   # Job: Build Project
-  # Compiles the project in both debug and release modes
+  # Compiles the project in both debug and release modes to ensure it builds successfully.
   # ------------------------------------------------------------------------------
   build:
-    executor: rust-executor
+    executor:
+      name: rust/default
+      tag: '1.80'
     steps:
       - checkout
-      - restore_cargo_cache
+      - rust/cargo_load_cache
       - run:
-          name: Build project
-          command: |
-            # Build in debug mode (faster compilation, includes debug symbols)
-            cargo build --verbose
+          name: Build project (debug)
+          command: cargo build --verbose
       - run:
-          name: Build release version
-          command: |
-            # Build in release mode (optimized, no debug symbols)
-            cargo build --release --verbose
-      # Save build artifacts to cache
-      - save_cargo_cache
-      # Share build artifacts with downstream jobs (test, doc, etc.)
+          name: Build project (release)
+          command: cargo build --release --verbose
+      - rust/cargo_save_cache
+      # Persist the `target` directory to the workspace for downstream jobs
       - persist_to_workspace:
-          root: ~/repo
+          root: .
           paths:
-            # target/ contains all compiled artifacts
             - target
 
   # ------------------------------------------------------------------------------
   # Job: Run Tests
-  # Executes all unit and integration tests
+  # Executes all unit and integration tests using `cargo test`.
   # ------------------------------------------------------------------------------
   test:
-    executor: rust-executor
+    executor:
+      name: rust/default
+      tag: '1.80'
     steps:
       - checkout
-      - restore_cargo_cache
-      # Reuse build artifacts from build job
+      - rust/cargo_load_cache
+      # Attach the workspace to access build artifacts from the `build` job
       - attach_workspace:
-          at: ~/repo
+          at: .
       - run:
           name: Run tests
-          command: |
-            # Run all tests with verbose output
-            # Includes unit tests, integration tests, and doc tests
-            cargo test --verbose
-      - save_cargo_cache
+          command: cargo test --verbose
 
   # ------------------------------------------------------------------------------
   # Job: Generate Code Coverage
-  # Creates coverage reports and uploads to Coveralls.io
+  # Generates a code coverage report using `cargo-llvm-cov` and uploads it to Coveralls.
   # ------------------------------------------------------------------------------
   coverage:
-    executor: rust-executor
+    executor:
+      name: rust/default
+      tag: '1.80'
     steps:
       - checkout
-      - restore_cargo_cache
-      # Install cargo-llvm-cov for coverage generation
-      - install_rust_tools
+      - rust/cargo_load_cache
+      - run:
+          name: Install cargo-llvm-cov
+          command: |
+            cargo install cargo-llvm-cov --version 0.5.31 || true
+            rustup component add llvm-tools-preview
       - run:
           name: Generate coverage report
           command: |
-            # Auto-detect package name from Cargo.toml
-            # This makes the config generic and reusable
+            # Auto-detect package name from Cargo.toml to keep the command generic
             PACKAGE_NAME=$(grep "^name = " Cargo.toml | head -n 1 | sed 's/name = "\(.*\)"/\1/')
             echo "📦 Detected package: $PACKAGE_NAME"
-
-            # Generate LCOV format report for Coveralls
-            # --lcov: Output in LCOV format (standard for coverage tools)
-            # --ignore-filename-regex: Exclude third-party code from coverage
+            # Generate LCOV report for Coveralls
             cargo llvm-cov --package "$PACKAGE_NAME" \
               --lcov --output-path coverage.lcov \
               --ignore-filename-regex "(\.cargo/registry|\.rustup/)"
-
-            # Generate text format report for console output
-            # | tee: Save to file while also displaying on screen
+            # Generate a text report for console output
             cargo llvm-cov --package "$PACKAGE_NAME" \
               --ignore-filename-regex "(\.cargo/registry|\.rustup/)" \
               | tee coverage.txt
       - run:
           name: Display coverage summary
           command: |
-            # Print coverage summary to CI logs for quick review
             echo "================================"
             echo "Code Coverage Summary"
             echo "================================"
@@ -202,142 +128,114 @@ jobs:
       - run:
           name: Upload coverage to Coveralls
           command: |
-            # Only upload if token is set (optional for private repos)
+            # Only upload if the COVERALLS_REPO_TOKEN is set
             if [ -n "$COVERALLS_REPO_TOKEN" ]; then
               echo "📤 Uploading coverage report to Coveralls..."
-
-              # Download official Coveralls CLI tool
               curl -sL https://coveralls.io/coveralls-linux.tar.gz | tar -xz
-              # Upload LCOV report with metadata
-              # CircleCI provides these environment variables automatically
               ./coveralls report coverage.lcov \
                 --repo-token="$COVERALLS_REPO_TOKEN" \
                 --service-name=circleci \
                 --service-number="$CIRCLE_BUILD_NUM" \
                 --commit="$CIRCLE_SHA1" \
                 --branch="$CIRCLE_BRANCH"
-
               echo "✅ Coverage report uploaded to Coveralls"
             else
-              # Skip upload if token not configured
               echo "⚠️  COVERALLS_REPO_TOKEN not set, skipping upload"
-              echo "Please add COVERALLS_REPO_TOKEN environment variable in CircleCI project settings"
             fi
-      # Save coverage reports as downloadable artifacts
+      # Store coverage reports as artifacts
       - store_artifacts:
           path: coverage.lcov
-          destination: coverage/lcov.info
       - store_artifacts:
           path: coverage.txt
-          destination: coverage/coverage.txt
-      - save_cargo_cache
 
   # ------------------------------------------------------------------------------
   # Job: Build Documentation
-  # Generates API documentation using rustdoc
+  # Generates API documentation using `rustdoc`.
   # ------------------------------------------------------------------------------
   doc:
-    executor: rust-executor
+    executor:
+      name: rust/default
+      tag: '1.80'
     steps:
       - checkout
-      - restore_cargo_cache
+      - rust/cargo_load_cache
       - run:
           name: Generate documentation
-          command: |
-            # Generate HTML documentation for the project
-            # --no-deps: Only document this crate, not dependencies
-            # --verbose: Show detailed output
-            cargo doc --no-deps --verbose
-      # Save generated documentation as downloadable artifact
+          command: cargo doc --no-deps --verbose
+      # Store the generated documentation as an artifact
       - store_artifacts:
           path: target/doc
           destination: doc
-      - save_cargo_cache
 
   # ------------------------------------------------------------------------------
   # Job: Security Audit
-  # Checks dependencies for known security vulnerabilities
+  # Checks for security vulnerabilities in dependencies using `cargo-audit`.
   # ------------------------------------------------------------------------------
   security_audit:
-    executor: rust-executor
+    executor:
+      name: rust/default
+      tag: '1.80'
     steps:
       - checkout
       - run:
           name: Install cargo-audit
-          command: |
-            # Install cargo-audit tool
-            # || true: Don't fail if already installed
-            cargo install cargo-audit || true
+          command: cargo install cargo-audit || true
       - run:
           name: Run security audit
-          command: |
-            # Check all dependencies against RustSec Advisory Database
-            # Fails if any known vulnerabilities are found
-            cargo audit
+          command: cargo audit
 
 # ==============================================================================
 # Workflow Definitions
-# Define how jobs are orchestrated and when they run
+# Orchestrates the execution of jobs, defining their order and dependencies.
 # ==============================================================================
 workflows:
   version: 2
 
   # ------------------------------------------------------------------------------
   # Workflow: Main Build and Test Pipeline
-  # Triggered on: Every commit to any branch
-  # Purpose: Continuous integration checks for all code changes
+  # Triggered on every commit to any branch.
   # ------------------------------------------------------------------------------
   build_and_test:
     jobs:
-      # Stage 1: Parallel quality checks (fast feedback)
-      # These run simultaneously for faster CI
-      - check_format  # Verify code formatting
-      - lint          # Check code quality with clippy
+      # Stage 1: Run fast, parallel checks for immediate feedback
+      - check_format
+      - lint
 
-      # Stage 2: Build project
-      # Only runs if format and lint checks pass
+      # Stage 2: Build the project after initial checks pass
       - build:
           requires:
-            - check_format  # Must pass format check
-            - lint          # Must pass lint check
+            - check_format
+            - lint
 
-      # Stage 3: Parallel validation (runs after successful build)
-      # These jobs reuse build artifacts for efficiency
+      # Stage 3: Run validation jobs in parallel after a successful build
       - test:
           requires:
-            - build  # Needs compiled artifacts
-
+            - build
       - doc:
           requires:
-            - build  # Needs compiled artifacts
-
+            - build
       - security_audit:
           requires:
-            - build  # Can run independently after build
+            - build
 
-      # Stage 4: Coverage analysis
-      # Runs after tests to measure code coverage
+      # Stage 4: Generate and upload code coverage after tests pass
       - coverage:
           requires:
-            - test  # Depends on test results
+            - test
 
   # ------------------------------------------------------------------------------
   # Workflow: Nightly Security Audit
-  # Triggered on: Daily at 00:00 UTC
-  # Purpose: Regular security scanning even without code changes
-  # Branches: Only main/master (production branches)
+  # Runs a security audit daily at midnight UTC on production branches.
   # ------------------------------------------------------------------------------
   nightly_security:
     triggers:
       - schedule:
-          # Cron format: minute hour day-of-month month day-of-week
-          # "0 0 * * *" = Every day at midnight UTC
+          # Cron syntax for daily at 00:00 UTC
           cron: "0 0 * * *"
           filters:
             branches:
               only:
-                - main    # Run on main branch
-                - master  # Run on master branch (if used)
+                - main
+                - master
     jobs:
-      - security_audit  # Check for new vulnerabilities daily
-
+      - security_audit
