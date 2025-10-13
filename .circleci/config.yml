@@ -39,12 +39,21 @@ jobs:
     steps:
       - checkout
       # Restore cached dependencies to speed up the process
-      - rust/cargo_load_cache
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "Cargo.lock" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
       - run:
           name: Run clippy
           command: cargo clippy --all-targets --all-features -- -D warnings
       # Save cache for future runs
-      - rust/cargo_save_cache
+      - save_cache:
+          key: v1-dependencies-{{ checksum "Cargo.lock" }}
+          paths:
+            - "~/.cargo/registry"
+            - "~/.cargo/git"
+            - "target"
 
   # ------------------------------------------------------------------------------
   # Job: Build Project
@@ -56,14 +65,23 @@ jobs:
       tag: '1.80'
     steps:
       - checkout
-      - rust/cargo_load_cache
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "Cargo.lock" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
       - run:
           name: Build project (debug)
           command: cargo build --verbose
       - run:
           name: Build project (release)
           command: cargo build --release --verbose
-      - rust/cargo_save_cache
+      - save_cache:
+          key: v1-dependencies-{{ checksum "Cargo.lock" }}
+          paths:
+            - "~/.cargo/registry"
+            - "~/.cargo/git"
+            - "target"
       # Persist the `target` directory to the workspace for downstream jobs
       - persist_to_workspace:
           root: .
@@ -80,7 +98,11 @@ jobs:
       tag: '1.80'
     steps:
       - checkout
-      - rust/cargo_load_cache
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "Cargo.lock" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
       # Attach the workspace to access build artifacts from the `build` job
       - attach_workspace:
           at: .
@@ -98,7 +120,11 @@ jobs:
       tag: '1.80'
     steps:
       - checkout
-      - rust/cargo_load_cache
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "Cargo.lock" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
       - run:
           name: Install cargo-llvm-cov
           command: |
@@ -158,7 +184,11 @@ jobs:
       tag: '1.80'
     steps:
       - checkout
-      - rust/cargo_load_cache
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "Cargo.lock" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
       - run:
           name: Generate documentation
           command: cargo doc --no-deps --verbose
