@@ -10,7 +10,7 @@ executors:
       # Official CircleCI Rust image with Rust 1.70+ toolchain
       - image: cimg/rust:1.70
     # Set working directory to project root
-    working_directory: ~/project
+    working_directory: ~/repo
     # Resource allocation: medium = 2 CPU, 4GB RAM
     # Options: small, medium, large, xlarge
     resource_class: medium
@@ -26,18 +26,18 @@ commands:
     steps:
       - restore_cache:
           keys:
-            # Try exact match first (based on Cargo.lock checksum)
-            - cargo-{{ checksum "Cargo.lock" }}-v1
+            # Try exact match first (based on Cargo.toml checksum)
+            - cargo-{{ checksum "Cargo.toml" }}-v2
             # Fall back to any cache with same version
-            - cargo-v1
+            - cargo-v2
 
   # Save Cargo dependencies to cache for future builds
   save_cargo_cache:
     description: "Save Cargo dependencies cache"
     steps:
       - save_cache:
-          # Cache key based on Cargo.lock to invalidate when dependencies change
-          key: cargo-{{ checksum "Cargo.lock" }}-v1
+          # Cache key based on Cargo.toml to invalidate when dependencies change
+          key: cargo-{{ checksum "Cargo.toml" }}-v2
           paths:
             # Cargo registry (downloaded crates)
             - ~/.cargo/registry
@@ -135,7 +135,7 @@ jobs:
       - save_cargo_cache
       # Share build artifacts with downstream jobs (test, doc, etc.)
       - persist_to_workspace:
-          root: ~/project
+          root: ~/repo
           paths:
             # target/ contains all compiled artifacts
             - target
@@ -151,7 +151,7 @@ jobs:
       - restore_cargo_cache
       # Reuse build artifacts from build job
       - attach_workspace:
-          at: ~/project
+          at: ~/repo
       - run:
           name: Run tests
           command: |
