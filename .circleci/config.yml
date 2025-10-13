@@ -20,7 +20,7 @@ jobs:
   check_format:
     executor:
       name: rust/default
-      tag: '1.81'
+      tag: '1.85'
     steps:
       - checkout
       - run:
@@ -35,7 +35,7 @@ jobs:
   lint:
     executor:
       name: rust/default
-      tag: '1.81'
+      tag: '1.85'
     steps:
       - checkout
       # Restore cached dependencies to speed up the process
@@ -62,7 +62,7 @@ jobs:
   build:
     executor:
       name: rust/default
-      tag: '1.81'
+      tag: '1.85'
     steps:
       - checkout
       - restore_cache:
@@ -95,7 +95,7 @@ jobs:
   test:
     executor:
       name: rust/default
-      tag: '1.81'
+      tag: '1.85'
     steps:
       - checkout
       - restore_cache:
@@ -117,7 +117,7 @@ jobs:
   coverage:
     executor:
       name: rust/default
-      tag: '1.81'
+      tag: '1.85'
     steps:
       - checkout
       - restore_cache:
@@ -190,7 +190,7 @@ jobs:
   doc:
     executor:
       name: rust/default
-      tag: '1.81'
+      tag: '1.85'
     steps:
       - checkout
       - restore_cache:
@@ -213,7 +213,7 @@ jobs:
   security_audit:
     executor:
       name: rust/default
-      tag: '1.81'
+      tag: '1.85'
     steps:
       - checkout
       - restore_cache:
