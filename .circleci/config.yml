@@ -125,14 +125,44 @@ jobs:
             - v1-dependencies-{{ checksum "Cargo.toml" }}
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
+      # Restore cache for cargo-binstall
+      - restore_cache:
+          keys:
+            - v1-cargo-binstall-{{ arch }}-v1.10.15
+            - v1-cargo-binstall-{{ arch }}-
+      # Restore cache for cargo-installed binaries
+      - restore_cache:
+          keys:
+            - v1-cargo-binaries-llvm-cov-0.6.21-{{ arch }}
+            - v1-cargo-binaries-llvm-cov-
       # Attach the workspace to access build artifacts from the `build` job
       - attach_workspace:
           at: .
       - run:
+          name: Install cargo-binstall
+          command: |
+            # Install cargo-binstall if not already cached
+            if ! command -v cargo-binstall &> /dev/null; then
+              echo "📥 Installing cargo-binstall..."
+              curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+            else
+              echo "✅ cargo-binstall already installed (cached)"
+            fi
+      - run:
           name: Install cargo-llvm-cov
           command: |
-            cargo install cargo-llvm-cov --version 0.6.21 --locked
+            # Use cargo-binstall for faster installation (downloads precompiled binaries)
+            if ! command -v cargo-llvm-cov &> /dev/null; then
+              echo "📥 Installing cargo-llvm-cov via cargo-binstall..."
+              cargo binstall cargo-llvm-cov --version 0.6.21 --no-confirm --log-level info
+            else
+              echo "✅ cargo-llvm-cov already installed (cached)"
+            fi
             rustup component add llvm-tools-preview
+      - save_cache:
+          key: v1-cargo-binstall-{{ arch }}-v1.10.15
+          paths:
+            - "~/.cargo/bin/cargo-binstall"
       - run:
           name: Generate coverage report
           command: |
@@ -173,6 +203,13 @@ jobs:
             - "~/.cargo/registry"
             - "~/.cargo/git"
             - "target"
+      # Save cache for cargo-llvm-cov binaries
+      - save_cache:
+          key: v1-cargo-binaries-llvm-cov-0.6.21-{{ arch }}
+          paths:
+            - "~/.cargo/bin/cargo-llvm-cov"
+            - "~/.cargo/bin/llvm-cov"
+            - "~/.cargo/bin/llvm-profdata"
       # Store coverage reports as artifacts
       - store_artifacts:
           path: coverage.lcov
@@ -217,14 +254,50 @@ jobs:
             - v1-dependencies-{{ checksum "Cargo.toml" }}
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
+      # Restore cache for cargo-binstall
+      - restore_cache:
+          keys:
+            - v1-cargo-binstall-{{ arch }}-v1.10.15
+            - v1-cargo-binstall-{{ arch }}-
+      # Restore cache for cargo-audit binary
+      - restore_cache:
+          keys:
+            - v1-cargo-binaries-audit-{{ arch }}-latest
+            - v1-cargo-binaries-audit-{{ arch }}-
+      - run:
+          name: Install cargo-binstall
+          command: |
+            # Install cargo-binstall if not already cached
+            if ! command -v cargo-binstall &> /dev/null; then
+              echo "📥 Installing cargo-binstall..."
+              curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+            else
+              echo "✅ cargo-binstall already installed (cached)"
+            fi
       - run:
           name: Install cargo-audit
-          command: cargo install cargo-audit
+          command: |
+            # Use cargo-binstall for faster installation (downloads precompiled binaries)
+            if ! command -v cargo-audit &> /dev/null; then
+              echo "📥 Installing cargo-audit via cargo-binstall..."
+              cargo binstall cargo-audit --no-confirm --log-level info
+            else
+              echo "✅ cargo-audit already installed (cached)"
+            fi
       - save_cache:
           key: v1-dependencies-{{ checksum "Cargo.toml" }}
           paths:
             - "~/.cargo/registry"
             - "~/.cargo/git"
+      - save_cache:
+          key: v1-cargo-binstall-{{ arch }}-v1.10.15
+          paths:
+            - "~/.cargo/bin/cargo-binstall"
+      # Save cache for cargo-audit binary
+      - save_cache:
+          key: v1-cargo-binaries-audit-{{ arch }}-latest
+          paths:
+            - "~/.cargo/bin/cargo-audit"
       - run:
           name: Run security audit
           command: cargo audit
