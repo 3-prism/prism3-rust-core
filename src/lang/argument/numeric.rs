@@ -426,7 +426,10 @@ where
 
     fn require_non_zero(self, name: &str) -> ArgumentResult<Self> {
         if self == T::default() {
-            return Err(ArgumentError::new(format!("Parameter '{}' cannot be zero", name)));
+            return Err(ArgumentError::new(format!(
+                "Parameter '{}' cannot be zero",
+                name
+            )));
         }
         Ok(self)
     }

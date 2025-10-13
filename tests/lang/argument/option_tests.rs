@@ -53,7 +53,9 @@ fn require_non_null_and_and_validate_if_present() {
             }
         })
         .unwrap_err();
-    assert!(err2.to_string().contains("Port must be greater than or equal to 1024"));
+    assert!(err2
+        .to_string()
+        .contains("Port must be greater than or equal to 1024"));
 
     let none2: Option<u16> = None;
     let res2: ArgumentResult<Option<u16>> = none2.validate_if_present("port", |p| Ok(*p));
@@ -159,7 +161,13 @@ fn test_require_null_or_with_different_predicates() {
     let value: Option<i32> = Some(5);
 
     // Range check
-    assert!(require_null_or("value", value, |&v| v >= 1 && v <= 10, "Must be between 1-10").is_ok());
+    assert!(require_null_or(
+        "value",
+        value,
+        |&v| v >= 1 && v <= 10,
+        "Must be between 1-10"
+    )
+    .is_ok());
 
     // Even number check
     assert!(require_null_or("value", Some(4), |&v| v % 2 == 0, "Must be even").is_ok());
@@ -360,9 +368,18 @@ fn test_require_non_null_error_branch() {
     let error_msg = error.to_string();
 
     // Verify error message contains parameter name and "null"
-    assert!(error_msg.contains("my_param"), "Error message should contain parameter name");
-    assert!(error_msg.contains("null"), "Error message should contain 'null'");
-    assert!(error_msg.contains("cannot"), "Error message should contain 'cannot'");
+    assert!(
+        error_msg.contains("my_param"),
+        "Error message should contain parameter name"
+    );
+    assert!(
+        error_msg.contains("null"),
+        "Error message should contain 'null'"
+    );
+    assert!(
+        error_msg.contains("cannot"),
+        "Error message should contain 'cannot'"
+    );
     assert_eq!(error_msg, "Parameter 'my_param' cannot be null");
 
     // Test different parameter names
@@ -449,7 +466,10 @@ fn test_require_non_null_closure_execution() {
     let none2: Option<String> = None;
     let result2 = none2.require_non_null("another_param_name");
     assert!(result2.is_err());
-    assert!(result2.unwrap_err().to_string().contains("another_param_name"));
+    assert!(result2
+        .unwrap_err()
+        .to_string()
+        .contains("another_param_name"));
 
     let none3: Option<f64> = None;
     let result3 = none3.require_non_null("x");
@@ -509,14 +529,19 @@ fn test_validate_if_present_error_propagation() {
     let some2: Option<String> = Some("ab".to_string());
     let result2 = some2.validate_if_present("text", |s| {
         if s.len() < 5 {
-            Err(ArgumentError::new("String length must be at least 5".to_string()))
+            Err(ArgumentError::new(
+                "String length must be at least 5".to_string(),
+            ))
         } else {
             Ok(s.clone())
         }
     });
 
     assert!(result2.is_err());
-    assert!(result2.unwrap_err().to_string().contains("String length must be at least 5"));
+    assert!(result2
+        .unwrap_err()
+        .to_string()
+        .contains("String length must be at least 5"));
 
     // Test with custom error type
     let some3: Option<u32> = Some(0);
@@ -529,7 +554,10 @@ fn test_validate_if_present_error_propagation() {
     });
 
     assert!(result3.is_err());
-    assert!(result3.unwrap_err().to_string().contains("Count cannot be zero"));
+    assert!(result3
+        .unwrap_err()
+        .to_string()
+        .contains("Count cannot be zero"));
 }
 
 #[test]
@@ -703,7 +731,10 @@ fn test_multiple_error_scenarios() {
     let some_val = Some(5);
     let result = some_val.require_non_null_and("val", |&v| v > 10, "must be greater than 10");
     assert!(result.is_err());
-    assert!(result.unwrap_err().to_string().contains("must be greater than 10"));
+    assert!(result
+        .unwrap_err()
+        .to_string()
+        .contains("must be greater than 10"));
 
     // Error from validate_if_present validator
     let some_val2 = Some(3);
@@ -727,14 +758,23 @@ fn test_multiple_error_scenarios() {
 #[test]
 fn test_require_non_null_with_explicit_error_check() {
     // Test multiple None values with different names
-    for name in &["a", "b", "c", "param1", "param2", "value", "test", "x", "y", "z"] {
+    for name in &[
+        "a", "b", "c", "param1", "param2", "value", "test", "x", "y", "z",
+    ] {
         let none: Option<i32> = None;
         match none.require_non_null(name) {
             Ok(_) => panic!("Expected error"),
             Err(err) => {
                 let msg = err.to_string();
-                assert!(msg.contains(name), "Error message should contain parameter name '{}'", name);
-                assert!(msg.contains("cannot be null"), "Error message should contain 'cannot be null'");
+                assert!(
+                    msg.contains(name),
+                    "Error message should contain parameter name '{}'",
+                    name
+                );
+                assert!(
+                    msg.contains("cannot be null"),
+                    "Error message should contain 'cannot be null'"
+                );
                 // Force error message evaluation
                 let _ = format!("{:?}", err);
                 let _ = err.message();
@@ -812,9 +852,7 @@ fn test_validate_if_present_with_explicit_branches() {
         let some: Option<i32> = Some(i);
         let name = format!("val_{}", i);
         let error_msg = format!("error_{}", i);
-        match some.validate_if_present(&name, |_v| {
-            Err(ArgumentError::new(error_msg.clone()))
-        }) {
+        match some.validate_if_present(&name, |_v| Err(ArgumentError::new(error_msg.clone()))) {
             Ok(_) => panic!("Expected error"),
             Err(err) => {
                 assert!(err.to_string().contains(&error_msg));
@@ -873,7 +911,9 @@ fn test_all_functions_with_various_types_and_names() {
     Some(3.14f32).require_non_null("f32").unwrap();
     Some(3.14f64).require_non_null("f64").unwrap();
     Some("str").require_non_null("str").unwrap();
-    Some(String::from("string")).require_non_null("string").unwrap();
+    Some(String::from("string"))
+        .require_non_null("string")
+        .unwrap();
     Some(true).require_non_null("bool").unwrap();
     Some('c').require_non_null("char").unwrap();
     Some(vec![1, 2, 3]).require_non_null("vec").unwrap();
@@ -881,11 +921,24 @@ fn test_all_functions_with_various_types_and_names() {
 
     // Test with different parameter names to trigger format! in different ways
     let test_names = vec![
-        "x", "y", "z", "a", "b", "c",
-        "value", "param", "arg", "input", "data",
-        "my_value", "some_param", "the_arg",
+        "x",
+        "y",
+        "z",
+        "a",
+        "b",
+        "c",
+        "value",
+        "param",
+        "arg",
+        "input",
+        "data",
+        "my_value",
+        "some_param",
+        "the_arg",
         "very_long_parameter_name_for_testing",
-        "param_1", "param_2", "param_3",
+        "param_1",
+        "param_2",
+        "param_3",
     ];
 
     for name in test_names {

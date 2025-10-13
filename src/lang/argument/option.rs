@@ -190,12 +190,10 @@ impl<T> OptionArgument<T> for Option<T> {
     {
         match self {
             None => Ok(None),
-            Some(ref value) => {
-                match validator(value) {
-                    Ok(_) => Ok(self),
-                    Err(e) => Err(e),
-                }
-            }
+            Some(ref value) => match validator(value) {
+                Ok(_) => Ok(self),
+                Err(e) => Err(e),
+            },
         }
     }
 }
@@ -246,7 +244,10 @@ where
         None => Ok(None),
         Some(ref v) => {
             if !predicate(v) {
-                return Err(ArgumentError::new(format!("Parameter '{}' {}", name, error_msg)));
+                return Err(ArgumentError::new(format!(
+                    "Parameter '{}' {}",
+                    name, error_msg
+                )));
             }
             Ok(value)
         }

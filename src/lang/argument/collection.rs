@@ -184,7 +184,10 @@ pub trait CollectionArgument {
 impl<T> CollectionArgument for [T] {
     fn require_non_empty(&self, name: &str) -> ArgumentResult<&Self> {
         if self.is_empty() {
-            return Err(ArgumentError::new(format!("Collection '{}' cannot be empty", name)));
+            return Err(ArgumentError::new(format!(
+                "Collection '{}' cannot be empty",
+                name
+            )));
         }
         Ok(self)
     }
@@ -242,7 +245,10 @@ impl<T> CollectionArgument for [T] {
 impl<T> CollectionArgument for Vec<T> {
     fn require_non_empty(&self, name: &str) -> ArgumentResult<&Self> {
         if self.is_empty() {
-            return Err(ArgumentError::new(format!("Collection '{}' cannot be empty", name)));
+            return Err(ArgumentError::new(format!(
+                "Collection '{}' cannot be empty",
+                name
+            )));
         }
         Ok(self)
     }

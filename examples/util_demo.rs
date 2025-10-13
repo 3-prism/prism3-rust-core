@@ -109,15 +109,22 @@ fn main() {
         second: "Alice",
         third: 25,
     };
-    println!("User Record: ID={}, Name={}, Age={}", record.first, record.second, record.third);
+    println!(
+        "User Record: ID={}, Name={}, Age={}",
+        record.first, record.second, record.third
+    );
 
     // Nested structures
     let nested = Pair {
         first: Pair::new(1, 2),
         second: Triple::new(3, 4, 5),
     };
-    println!("Nested: pair=({}, {}), triple=({}, {}, {})",
-        nested.first.first, nested.first.second,
-        nested.second.first, nested.second.second, nested.second.third);
+    println!(
+        "Nested: pair=({}, {}), triple=({}, {}, {})",
+        nested.first.first,
+        nested.first.second,
+        nested.second.first,
+        nested.second.second,
+        nested.second.third
+    );
 }
-
