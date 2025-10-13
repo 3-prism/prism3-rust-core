@@ -161,12 +161,8 @@ jobs:
             if [ -n "$COVERALLS_REPO_TOKEN" ]; then
               echo "📤 Uploading coverage report to Coveralls..."
               curl -sL https://coveralls.io/coveralls-linux.tar.gz | tar -xz
-              ./coveralls report coverage.lcov \
-                --repo-token="$COVERALLS_REPO_TOKEN" \
-                --service-name=circleci \
-                --service-number="$CIRCLE_BUILD_NUM" \
-                --commit="$CIRCLE_SHA1" \
-                --branch="$CIRCLE_BRANCH"
+              # Coveralls CLI automatically detects CircleCI environment
+              ./coveralls report coverage.lcov --repo-token="$COVERALLS_REPO_TOKEN"
               echo "✅ Coverage report uploaded to Coveralls"
             else
               echo "⚠️  COVERALLS_REPO_TOKEN not set, skipping upload"
