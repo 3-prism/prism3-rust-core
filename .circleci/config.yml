@@ -125,10 +125,13 @@ jobs:
             - v1-dependencies-{{ checksum "Cargo.lock" }}
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
+      # Attach the workspace to access build artifacts from the `build` job
+      - attach_workspace:
+          at: .
       - run:
           name: Install cargo-llvm-cov
           command: |
-            cargo install cargo-llvm-cov --version 0.5.31 || true
+            cargo install cargo-llvm-cov --version 0.5.31
             rustup component add llvm-tools-preview
       - run:
           name: Generate coverage report
@@ -137,11 +140,11 @@ jobs:
             PACKAGE_NAME=$(grep "^name = " Cargo.toml | head -n 1 | sed 's/name = "\(.*\)"/\1/')
             echo "📦 Detected package: $PACKAGE_NAME"
             # Generate LCOV report for Coveralls
-            cargo llvm-cov --package "$PACKAGE_NAME" \
+            cargo-llvm-cov --package "$PACKAGE_NAME" \
               --lcov --output-path coverage.lcov \
               --ignore-filename-regex "(\.cargo/registry|\.rustup/)"
             # Generate a text report for console output
-            cargo llvm-cov --package "$PACKAGE_NAME" \
+            cargo-llvm-cov --package "$PACKAGE_NAME" \
               --ignore-filename-regex "(\.cargo/registry|\.rustup/)" \
               | tee coverage.txt
       - run:
@@ -168,6 +171,12 @@ jobs:
             else
               echo "⚠️  COVERALLS_REPO_TOKEN not set, skipping upload"
             fi
+      - save_cache:
+          key: v1-dependencies-{{ checksum "Cargo.lock" }}
+          paths:
+            - "~/.cargo/registry"
+            - "~/.cargo/git"
+            - "target"
       # Store coverage reports as artifacts
       - store_artifacts:
           path: coverage.lcov
@@ -207,9 +216,19 @@ jobs:
       tag: '1.80'
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "Cargo.lock" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
       - run:
           name: Install cargo-audit
-          command: cargo install cargo-audit || true
+          command: cargo install cargo-audit --features rustls-tls
+      - save_cache:
+          key: v1-dependencies-{{ checksum "Cargo.lock" }}
+          paths:
+            - "~/.cargo/registry"
+            - "~/.cargo/git"
       - run:
           name: Run security audit
           command: cargo audit
