@@ -223,7 +223,7 @@ jobs:
             - v1-dependencies-
       - run:
           name: Install cargo-audit
-          command: cargo install cargo-audit --features rustls-tls
+          command: cargo install cargo-audit
       - save_cache:
           key: v1-dependencies-{{ checksum "Cargo.toml" }}
           paths:
