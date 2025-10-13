@@ -27,21 +27,24 @@ jobs:
       # Restore cached dependencies to speed up the process
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "Cargo.toml" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
+            - v2-cargo-cache-{{ arch }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}
+            - v2-cargo-cache-{{ arch }}-{{ checksum "Cargo.toml" }}-
+            - v2-cargo-cache-{{ arch }}-
       - run:
           name: Check code format
           command: cargo fmt -- --check
       - run:
-          name: Run clippy
-          command: cargo clippy --all-targets --all-features -- -D warnings
-      # Save cache for future runs
+          name: Run clippy (with dependency caching)
+          command: |
+            # Use cargo check first to build dependencies, then clippy
+            cargo clippy --all-targets --all-features -- -D warnings
+      # Save cache for future runs (separate caches for registry and build artifacts)
       - save_cache:
-          key: v1-dependencies-{{ checksum "Cargo.toml" }}
+          key: v2-cargo-cache-{{ arch }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}
           paths:
-            - "~/.cargo/registry"
-            - "~/.cargo/git"
+            - "~/.cargo/registry/index"
+            - "~/.cargo/registry/cache"
+            - "~/.cargo/git/db"
             - "target"
 
   # ------------------------------------------------------------------------------
@@ -56,11 +59,12 @@ jobs:
     resource_class: medium+
     steps:
       - checkout
+      # Restore enhanced cargo cache (includes Cargo.lock for more precise caching)
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "Cargo.toml" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
+            - v2-cargo-cache-{{ arch }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}
+            - v2-cargo-cache-{{ arch }}-{{ checksum "Cargo.toml" }}-
+            - v2-cargo-cache-{{ arch }}-
       - run:
           name: Build project (debug)
           command: cargo build --verbose
@@ -70,11 +74,13 @@ jobs:
       - run:
           name: Build project (release)
           command: cargo build --release --verbose
+      # Save enhanced cargo cache with more granular paths
       - save_cache:
-          key: v1-dependencies-{{ checksum "Cargo.toml" }}
+          key: v2-cargo-cache-{{ arch }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}
           paths:
-            - "~/.cargo/registry"
-            - "~/.cargo/git"
+            - "~/.cargo/registry/index"
+            - "~/.cargo/registry/cache"
+            - "~/.cargo/git/db"
             - "target"
       # Persist the `target` directory to the workspace for downstream jobs
       - persist_to_workspace:
@@ -92,11 +98,12 @@ jobs:
       tag: '1.85'
     steps:
       - checkout
+      # Restore enhanced cargo cache
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "Cargo.toml" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
+            - v2-cargo-cache-{{ arch }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}
+            - v2-cargo-cache-{{ arch }}-{{ checksum "Cargo.toml" }}-
+            - v2-cargo-cache-{{ arch }}-
       # Restore cache for cargo-binstall
       - restore_cache:
           keys:
@@ -169,11 +176,13 @@ jobs:
             else
               echo "⚠️  COVERALLS_REPO_TOKEN not set, skipping upload"
             fi
+      # Save enhanced cargo cache
       - save_cache:
-          key: v1-dependencies-{{ checksum "Cargo.toml" }}
+          key: v2-cargo-cache-{{ arch }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}
           paths:
-            - "~/.cargo/registry"
-            - "~/.cargo/git"
+            - "~/.cargo/registry/index"
+            - "~/.cargo/registry/cache"
+            - "~/.cargo/git/db"
             - "target"
       # Save cache for cargo-llvm-cov binaries
       - save_cache:
@@ -198,11 +207,15 @@ jobs:
       tag: '1.85'
     steps:
       - checkout
+      # Restore enhanced cargo cache
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "Cargo.toml" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
+            - v2-cargo-cache-{{ arch }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}
+            - v2-cargo-cache-{{ arch }}-{{ checksum "Cargo.toml" }}-
+            - v2-cargo-cache-{{ arch }}-
+      # Attach workspace to reuse build artifacts from build_and_test
+      - attach_workspace:
+          at: .
       - run:
           name: Generate documentation
           command: cargo doc --no-deps --verbose
@@ -221,11 +234,12 @@ jobs:
       tag: '1.85'
     steps:
       - checkout
+      # Restore enhanced cargo cache
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "Cargo.toml" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
+            - v2-cargo-cache-{{ arch }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}
+            - v2-cargo-cache-{{ arch }}-{{ checksum "Cargo.toml" }}-
+            - v2-cargo-cache-{{ arch }}-
       # Restore cache for cargo-binstall
       - restore_cache:
           keys:
@@ -256,11 +270,13 @@ jobs:
             else
               echo "✅ cargo-audit already installed (cached)"
             fi
+      # Save enhanced cargo cache
       - save_cache:
-          key: v1-dependencies-{{ checksum "Cargo.toml" }}
+          key: v2-cargo-cache-{{ arch }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}
           paths:
-            - "~/.cargo/registry"
-            - "~/.cargo/git"
+            - "~/.cargo/registry/index"
+            - "~/.cargo/registry/cache"
+            - "~/.cargo/git/db"
       - save_cache:
           key: v1-cargo-binstall-{{ arch }}-v1.10.15
           paths:
