@@ -347,4 +347,3 @@ impl<F: fmt::Display, S: fmt::Display, T: fmt::Display> fmt::Display for Triple<
         write!(f, "({}, {}, {})", self.first, self.second, self.third)
     }
 }
-

@@ -318,4 +318,3 @@ impl<F: fmt::Display, S: fmt::Display> fmt::Display for Pair<F, S> {
         write!(f, "({}, {})", self.first, self.second)
     }
 }
-

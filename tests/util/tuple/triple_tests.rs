@@ -203,4 +203,3 @@ fn test_map_all_fields() {
     assert_eq!(result.second, 40);
     assert_eq!(result.third, 90);
 }
-

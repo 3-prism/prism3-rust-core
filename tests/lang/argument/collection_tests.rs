@@ -66,5 +66,3 @@ fn require_element_non_null_checks() {
     let err2 = require_element_non_null("items", &none_first).unwrap_err();
     assert!(err2.message().contains("element at index 0"));
 }
-
-

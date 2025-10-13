@@ -19,4 +19,3 @@ pub mod triple;
 
 pub use pair::Pair;
 pub use triple::Triple;
-

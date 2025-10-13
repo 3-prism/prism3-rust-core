@@ -173,4 +173,3 @@ fn test_pair_hash() {
     assert!(set.contains(&Pair::new(1, 2)));
     assert!(set.contains(&Pair::new(3, 4)));
 }
-
