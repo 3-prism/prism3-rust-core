@@ -121,22 +121,23 @@ fn test_struct_literal_creation() {
 
 #[test]
 fn test_pair_with_different_types() {
-    let pair1 = Pair::new(42_i32, 3.14_f64);
+    let pair1 = Pair::new(42_i32, 2.71_f64);
     assert_eq!(pair1.first, 42);
-    assert_eq!(pair1.second, 3.14);
+    assert_eq!(pair1.second, 2.71);
 
     let pair2 = Pair::new(String::from("hello"), vec![1, 2, 3]);
     assert_eq!(pair2.first, "hello");
     assert_eq!(pair2.second, vec![1, 2, 3]);
 
     let pair3 = Pair::new(true, Some(100));
-    assert_eq!(pair3.first, true);
+    assert!(pair3.first);
     assert_eq!(pair3.second, Some(100));
 }
 
 #[test]
 fn test_pair_clone() {
-    let pair1 = Pair::new(1, 2);
+    let pair1 = Pair::new(String::from("a"), String::from("b"));
+    #[allow(clippy::redundant_clone)]
     let pair2 = pair1.clone();
     assert_eq!(pair1, pair2);
 }

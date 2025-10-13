@@ -94,10 +94,10 @@ fn test_require_non_null_various_types() {
     assert_eq!(string_opt.require_non_null("string").unwrap(), "world");
 
     let bool_opt: Option<bool> = Some(true);
-    assert_eq!(bool_opt.require_non_null("bool").unwrap(), true);
+    assert!(bool_opt.require_non_null("bool").unwrap());
 
-    let float_opt: Option<f64> = Some(3.14);
-    assert_eq!(float_opt.require_non_null("float").unwrap(), 3.14);
+    let float_opt: Option<f64> = Some(2.71);
+    assert_eq!(float_opt.require_non_null("float").unwrap(), 2.71);
 }
 
 #[test]
@@ -164,7 +164,7 @@ fn test_require_null_or_with_different_predicates() {
     assert!(require_null_or(
         "value",
         value,
-        |&v| v >= 1 && v <= 10,
+        |&v| (1..=10).contains(&v),
         "Must be between 1-10"
     )
     .is_ok());
@@ -197,7 +197,7 @@ fn test_require_non_null_and_success_branch() {
     assert_eq!(result.unwrap(), 20);
 
     let value2: Option<String> = Some("hello".to_string());
-    let result2 = value2.require_non_null_and("text", |s| s.len() > 0, "Cannot be empty");
+    let result2 = value2.require_non_null_and("text", |s| !s.is_empty(), "Cannot be empty");
     assert!(result2.is_ok());
 }
 
@@ -320,7 +320,7 @@ fn test_require_non_null_and_ok_value() {
 
     // Test different types
     let some_str: Option<String> = Some("test".to_string());
-    let result2 = some_str.require_non_null_and("text", |s| s.len() > 0, "Cannot be empty");
+    let result2 = some_str.require_non_null_and("text", |s| !s.is_empty(), "Cannot be empty");
     assert!(result2.is_ok());
     let val2 = result2.unwrap();
     assert_eq!(val2, "test");
@@ -408,7 +408,7 @@ fn test_require_non_null_and_error_propagation() {
 
     // Test different types
     let none_str: Option<String> = None;
-    let result2 = none_str.require_non_null_and("text_param", |s| s.len() > 0, "Cannot be empty");
+    let result2 = none_str.require_non_null_and("text_param", |s| !s.is_empty(), "Cannot be empty");
     assert!(result2.is_err());
     assert!(result2.unwrap_err().to_string().contains("text_param"));
 }
@@ -595,14 +595,14 @@ fn test_require_non_null_and_predicate_true_branch() {
 
     // Test with different valid values
     let some2: Option<String> = Some("hello".to_string());
-    let result2 = some2.require_non_null_and("text", |s| s.len() > 0, "cannot be empty");
+    let result2 = some2.require_non_null_and("text", |s| !s.is_empty(), "cannot be empty");
     assert!(result2.is_ok());
     assert_eq!(result2.unwrap(), "hello");
 
-    let some3: Option<f64> = Some(3.14);
+    let some3: Option<f64> = Some(2.71);
     let result3 = some3.require_non_null_and("pi", |&v| v > 0.0, "must be positive");
     assert!(result3.is_ok());
-    assert_eq!(result3.unwrap(), 3.14);
+    assert_eq!(result3.unwrap(), 2.71);
 }
 
 #[test]
@@ -663,7 +663,7 @@ fn test_require_null_or_some_success_branch() {
 
     // Test with different valid values
     let some2: Option<String> = Some("hello".to_string());
-    let result2 = require_null_or("text", some2, |s| s.len() > 0, "cannot be empty");
+    let result2 = require_null_or("text", some2, |s| !s.is_empty(), "cannot be empty");
     assert!(result2.is_ok());
     assert_eq!(result2.unwrap(), Some("hello".to_string()));
 }
@@ -908,8 +908,8 @@ fn test_all_functions_with_various_types_and_names() {
     Some(42i64).require_non_null("i64").unwrap();
     Some(42u32).require_non_null("u32").unwrap();
     Some(42u64).require_non_null("u64").unwrap();
-    Some(3.14f32).require_non_null("f32").unwrap();
-    Some(3.14f64).require_non_null("f64").unwrap();
+    Some(2.71f32).require_non_null("f32").unwrap();
+    Some(2.71f64).require_non_null("f64").unwrap();
     Some("str").require_non_null("str").unwrap();
     Some(String::from("string"))
         .require_non_null("string")

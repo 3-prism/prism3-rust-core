@@ -21,7 +21,7 @@ fn test_new() {
     let triple = Triple::new(1, "hello", true);
     assert_eq!(triple.first, 1);
     assert_eq!(triple.second, "hello");
-    assert_eq!(triple.third, true);
+    assert!(triple.third);
 }
 
 #[test]
@@ -30,7 +30,7 @@ fn test_into_tuple() {
     let (first, second, third) = triple.into_tuple();
     assert_eq!(first, 1);
     assert_eq!(second, "hello");
-    assert_eq!(third, true);
+    assert!(third);
 }
 
 #[test]
@@ -58,7 +58,7 @@ fn test_map_first() {
     let mapped = triple.map_first(|x| x * 2);
     assert_eq!(mapped.first, 2);
     assert_eq!(mapped.second, "hello");
-    assert_eq!(mapped.third, true);
+    assert!(mapped.third);
 }
 
 #[test]
@@ -67,7 +67,7 @@ fn test_map_second() {
     let mapped = triple.map_second(|s| s.len());
     assert_eq!(mapped.first, 1);
     assert_eq!(mapped.second, 5);
-    assert_eq!(mapped.third, true);
+    assert!(mapped.third);
 }
 
 #[test]
@@ -84,7 +84,7 @@ fn test_from_tuple() {
     let triple: Triple<i32, &str, bool> = (1, "hello", true).into();
     assert_eq!(triple.first, 1);
     assert_eq!(triple.second, "hello");
-    assert_eq!(triple.third, true);
+    assert!(triple.third);
 }
 
 #[test]
@@ -130,14 +130,14 @@ fn test_struct_literal_creation() {
     };
     assert_eq!(triple.first, "name");
     assert_eq!(triple.second, 42);
-    assert_eq!(triple.third, true);
+    assert!(triple.third);
 }
 
 #[test]
 fn test_triple_with_different_types() {
-    let triple1 = Triple::new(42_i32, 3.14_f64, 'a');
+    let triple1 = Triple::new(42_i32, 2.71_f64, 'a');
     assert_eq!(triple1.first, 42);
-    assert_eq!(triple1.second, 3.14);
+    assert_eq!(triple1.second, 2.71);
     assert_eq!(triple1.third, 'a');
 
     let triple2 = Triple::new(String::from("hello"), vec![1, 2, 3], Some(100));
@@ -146,14 +146,15 @@ fn test_triple_with_different_types() {
     assert_eq!(triple2.third, Some(100));
 
     let triple3 = Triple::new(true, false, true);
-    assert_eq!(triple3.first, true);
-    assert_eq!(triple3.second, false);
-    assert_eq!(triple3.third, true);
+    assert!(triple3.first);
+    assert!(!triple3.second);
+    assert!(triple3.third);
 }
 
 #[test]
 fn test_triple_clone() {
-    let triple1 = Triple::new(1, 2, 3);
+    let triple1 = Triple::new(String::from("a"), String::from("b"), String::from("c"));
+    #[allow(clippy::redundant_clone)]
     let triple2 = triple1.clone();
     assert_eq!(triple1, triple2);
 }
