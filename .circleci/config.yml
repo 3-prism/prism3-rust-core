@@ -48,54 +48,16 @@ jobs:
             - "target"
 
   # ------------------------------------------------------------------------------
-  # Job: Build and Test
-  # Combines building and testing in a single job to reduce container overhead.
-  # This optimization saves ~15-20 seconds by eliminating one container spin-up.
+  # Job: Build, Test and Coverage
+  # Combines building, testing, and coverage generation in a single job.
+  # This optimization eliminates an additional container spin-up (~12-15 seconds).
+  # Coverage is generated immediately after tests run, reusing the same environment.
   # ------------------------------------------------------------------------------
-  build_and_test:
+  build_test_coverage:
     executor:
       name: rust/default
       tag: '1.85'
     resource_class: medium+
-    steps:
-      - checkout
-      # Restore enhanced cargo cache (includes Cargo.lock for more precise caching)
-      - restore_cache:
-          keys:
-            - v2-cargo-cache-{{ arch }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}
-            - v2-cargo-cache-{{ arch }}-{{ checksum "Cargo.toml" }}-
-            - v2-cargo-cache-{{ arch }}-
-      - run:
-          name: Build project (debug)
-          command: cargo build --verbose
-      - run:
-          name: Run tests
-          command: cargo test --verbose
-      - run:
-          name: Build project (release)
-          command: cargo build --release --verbose
-      # Save enhanced cargo cache with more granular paths
-      - save_cache:
-          key: v2-cargo-cache-{{ arch }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}
-          paths:
-            - "~/.cargo/registry/index"
-            - "~/.cargo/registry/cache"
-            - "~/.cargo/git/db"
-            - "target"
-      # Persist the `target` directory to the workspace for downstream jobs
-      - persist_to_workspace:
-          root: .
-          paths:
-            - target
-
-  # ------------------------------------------------------------------------------
-  # Job: Generate Code Coverage
-  # Generates a code coverage report using `cargo-llvm-cov` and uploads it to Coveralls.
-  # ------------------------------------------------------------------------------
-  coverage:
-    executor:
-      name: rust/default
-      tag: '1.85'
     steps:
       - checkout
       # Restore enhanced cargo cache
@@ -109,18 +71,14 @@ jobs:
           keys:
             - v1-cargo-binstall-{{ arch }}-v1.10.15
             - v1-cargo-binstall-{{ arch }}-
-      # Restore cache for cargo-installed binaries
+      # Restore cache for cargo-llvm-cov
       - restore_cache:
           keys:
             - v1-cargo-binaries-llvm-cov-0.6.21-{{ arch }}
             - v1-cargo-binaries-llvm-cov-
-      # Attach the workspace to access build artifacts from the `build` job
-      - attach_workspace:
-          at: .
       - run:
           name: Install cargo-binstall
           command: |
-            # Install cargo-binstall if not already cached
             if ! command -v cargo-binstall &> /dev/null; then
               echo "📥 Installing cargo-binstall..."
               curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
@@ -130,7 +88,6 @@ jobs:
       - run:
           name: Install cargo-llvm-cov
           command: |
-            # Use cargo-binstall for faster installation (downloads precompiled binaries)
             if ! command -v cargo-llvm-cov &> /dev/null; then
               echo "📥 Installing cargo-llvm-cov via cargo-binstall..."
               cargo binstall cargo-llvm-cov --version 0.6.21 --no-confirm --log-level info
@@ -138,14 +95,16 @@ jobs:
               echo "✅ cargo-llvm-cov already installed (cached)"
             fi
             rustup component add llvm-tools-preview
-      - save_cache:
-          key: v1-cargo-binstall-{{ arch }}-v1.10.15
-          paths:
-            - "~/.cargo/bin/cargo-binstall"
+      - run:
+          name: Build project (debug)
+          command: cargo build --verbose
+      - run:
+          name: Run tests
+          command: cargo test --verbose
       - run:
           name: Generate coverage report
           command: |
-            # Auto-detect package name from Cargo.toml to keep the command generic
+            # Auto-detect package name from Cargo.toml
             PACKAGE_NAME=$(grep "^name = " Cargo.toml | head -n 1 | sed 's/name = "\(.*\)"/\1/')
             echo "📦 Detected package: $PACKAGE_NAME"
             # Generate LCOV report for Coveralls
@@ -166,17 +125,18 @@ jobs:
       - run:
           name: Upload coverage to Coveralls
           command: |
-            # Only upload if the COVERALLS_REPO_TOKEN is set
             if [ -n "$COVERALLS_REPO_TOKEN" ]; then
               echo "📤 Uploading coverage report to Coveralls..."
               curl -sL https://coveralls.io/coveralls-linux.tar.gz | tar -xz
-              # Coveralls CLI automatically detects CircleCI environment
               ./coveralls report coverage.lcov --repo-token="$COVERALLS_REPO_TOKEN"
               echo "✅ Coverage report uploaded to Coveralls"
             else
               echo "⚠️  COVERALLS_REPO_TOKEN not set, skipping upload"
             fi
-      # Save enhanced cargo cache
+      - run:
+          name: Build project (release)
+          command: cargo build --release --verbose
+      # Save all caches
       - save_cache:
           key: v2-cargo-cache-{{ arch }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}
           paths:
@@ -184,7 +144,10 @@ jobs:
             - "~/.cargo/registry/cache"
             - "~/.cargo/git/db"
             - "target"
-      # Save cache for cargo-llvm-cov binaries
+      - save_cache:
+          key: v1-cargo-binstall-{{ arch }}-v1.10.15
+          paths:
+            - "~/.cargo/bin/cargo-binstall"
       - save_cache:
           key: v1-cargo-binaries-llvm-cov-0.6.21-{{ arch }}
           paths:
@@ -196,6 +159,12 @@ jobs:
           path: coverage.lcov
       - store_artifacts:
           path: coverage.txt
+      # Persist the `target` directory to the workspace for downstream jobs
+      - persist_to_workspace:
+          root: .
+          paths:
+            - target
+
 
   # ------------------------------------------------------------------------------
   # Job: Build Documentation
@@ -301,29 +270,32 @@ workflows:
   # Workflow: Main Build and Test Pipeline
   # Triggered on every commit to any branch.
   # Optimized to reduce container spin-up overhead by combining related jobs.
+  # Total containers: 4 (down from original 7)
   # ------------------------------------------------------------------------------
   main_pipeline:
     jobs:
       # Stage 1: Fast quality checks (format + lint in one container)
       - fast_checks
 
-      # Stage 2: Build and test in one container (saves ~15-20s container spin-up)
-      - build_and_test:
+      # Stage 2: Build, test and coverage in one container
+      # This is the core job that includes:
+      #   - Build (debug + release)
+      #   - Run tests
+      #   - Generate coverage reports
+      #   - Upload to Coveralls
+      # Saves ~12-15 seconds by eliminating separate coverage container
+      - build_test_coverage:
           requires:
             - fast_checks
 
       # Stage 3: Run additional validation jobs in parallel
+      # These jobs reuse build artifacts from build_test_coverage
       - doc:
           requires:
-            - build_and_test
+            - build_test_coverage
       - security_audit:
           requires:
-            - build_and_test
-
-      # Stage 4: Generate and upload code coverage
-      - coverage:
-          requires:
-            - build_and_test
+            - build_test_coverage
 
   # ------------------------------------------------------------------------------
   # Workflow: Nightly Security Audit
