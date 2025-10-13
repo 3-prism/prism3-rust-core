@@ -14,25 +14,11 @@ orbs:
 # ==============================================================================
 jobs:
   # ------------------------------------------------------------------------------
-  # Job: Check Code Formatting
-  # Ensures all Rust code adheres to the standard formatting guidelines using `cargo fmt`.
+  # Job: Fast Quality Checks
+  # Combines format checking and linting in a single job to reduce container spin-up overhead.
+  # This optimization reduces the number of containers from 2 to 1, saving ~15-20 seconds.
   # ------------------------------------------------------------------------------
-  check_format:
-    executor:
-      name: rust/default
-      tag: '1.85'
-    steps:
-      - checkout
-      - run:
-          name: Check code format
-          command: cargo fmt -- --check
-
-  # ------------------------------------------------------------------------------
-  # Job: Lint Checks
-  # Runs `cargo clippy` to catch common mistakes and improve code quality.
-  # Fails on any warnings (`-D warnings`).
-  # ------------------------------------------------------------------------------
-  lint:
+  fast_checks:
     executor:
       name: rust/default
       tag: '1.85'
@@ -45,6 +31,9 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
       - run:
+          name: Check code format
+          command: cargo fmt -- --check
+      - run:
           name: Run clippy
           command: cargo clippy --all-targets --all-features -- -D warnings
       # Save cache for future runs
@@ -56,13 +45,15 @@ jobs:
             - "target"
 
   # ------------------------------------------------------------------------------
-  # Job: Build Project
-  # Compiles the project in both debug and release modes to ensure it builds successfully.
+  # Job: Build and Test
+  # Combines building and testing in a single job to reduce container overhead.
+  # This optimization saves ~15-20 seconds by eliminating one container spin-up.
   # ------------------------------------------------------------------------------
-  build:
+  build_and_test:
     executor:
       name: rust/default
       tag: '1.85'
+    resource_class: medium+
     steps:
       - checkout
       - restore_cache:
@@ -73,6 +64,9 @@ jobs:
       - run:
           name: Build project (debug)
           command: cargo build --verbose
+      - run:
+          name: Run tests
+          command: cargo test --verbose
       - run:
           name: Build project (release)
           command: cargo build --release --verbose
@@ -87,28 +81,6 @@ jobs:
           root: .
           paths:
             - target
-
-  # ------------------------------------------------------------------------------
-  # Job: Run Tests
-  # Executes all unit and integration tests using `cargo test`.
-  # ------------------------------------------------------------------------------
-  test:
-    executor:
-      name: rust/default
-      tag: '1.85'
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "Cargo.toml" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
-      # Attach the workspace to access build artifacts from the `build` job
-      - attach_workspace:
-          at: .
-      - run:
-          name: Run tests
-          command: cargo test --verbose
 
   # ------------------------------------------------------------------------------
   # Job: Generate Code Coverage
@@ -312,34 +284,30 @@ workflows:
   # ------------------------------------------------------------------------------
   # Workflow: Main Build and Test Pipeline
   # Triggered on every commit to any branch.
+  # Optimized to reduce container spin-up overhead by combining related jobs.
   # ------------------------------------------------------------------------------
-  build_and_test:
+  main_pipeline:
     jobs:
-      # Stage 1: Run fast, parallel checks for immediate feedback
-      - check_format
-      - lint
+      # Stage 1: Fast quality checks (format + lint in one container)
+      - fast_checks
 
-      # Stage 2: Build the project after initial checks pass
-      - build:
+      # Stage 2: Build and test in one container (saves ~15-20s container spin-up)
+      - build_and_test:
           requires:
-            - check_format
-            - lint
+            - fast_checks
 
-      # Stage 3: Run validation jobs in parallel after a successful build
-      - test:
-          requires:
-            - build
+      # Stage 3: Run additional validation jobs in parallel
       - doc:
           requires:
-            - build
+            - build_and_test
       - security_audit:
           requires:
-            - build
+            - build_and_test
 
-      # Stage 4: Generate and upload code coverage after tests pass
+      # Stage 4: Generate and upload code coverage
       - coverage:
           requires:
-            - test
+            - build_and_test
 
   # ------------------------------------------------------------------------------
   # Workflow: Nightly Security Audit
