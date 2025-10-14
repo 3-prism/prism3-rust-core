@@ -274,17 +274,30 @@ cargo llvm-cov test --text | grep -A 50 "option.rs"
 
 ## 许可证
 
-本项目采用 Apache License 2.0 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
+Copyright (c) 2025 3-Prism Co. Ltd. All rights reserved.
+
+根据 Apache 许可证 2.0 版（"许可证"）授权；
+除非遵守许可证，否则您不得使用此文件。
+您可以在以下位置获取许可证副本：
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+除非适用法律要求或书面同意，否则根据许可证分发的软件
+按"原样"分发，不附带任何明示或暗示的担保或条件。
+有关许可证下的特定语言管理权限和限制，请参阅许可证。
+
+完整的许可证文本请参阅 [LICENSE](LICENSE)。
 
 ## 贡献
 
 欢迎贡献！请随时提交 Pull Request。
 
-在贡献测试时，请注意对于包含大量 trait 定义的模块，达到 100% region 覆盖率并不总是可行的。应专注于确保所有可执行代码路径都经过测试。
+在贡献测试时，请注意对于包含大量 trait 定义的模块，达到 100% region 覆盖率并不总是可行的。
+应专注于确保所有可执行代码路径都经过测试。
 
 ## 作者
 
-**Hu Haixing** - *3-Prism Co. Ltd.*
+**胡海星** - *棱芯科技有限公司*
 
 ---
 
