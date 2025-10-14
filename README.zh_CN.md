@@ -301,4 +301,4 @@ Copyright (c) 2025 3-Prism Co. Ltd. All rights reserved.
 
 ---
 
-有关 Prism3 生态系统的更多信息，请访问我们的 [GitHub 仓库](https://github.com/3-prism/prism3-rust-core)。
+有关 Prism3 生态系统的更多信息，请访问我们的 [GitHub 主页](https://github.com/3-prism)。

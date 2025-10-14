@@ -302,4 +302,4 @@ When contributing tests, note that achieving 100% region coverage is not always 
 
 ---
 
-For more information about the Prism3 ecosystem, visit our [GitHub repository](https://github.com/3-prism/prism3-rust-core).
+For more information about the Prism3 ecosystem, visit our [GitHub homepage](https://github.com/3-prism).
