@@ -136,7 +136,7 @@ For detailed API documentation, please refer to:
 
 ## Author
 
-Hu Haixing
+Haixing Hu
 
 ## Copyright
 

@@ -12,7 +12,7 @@
 //!
 //! # Author
 //!
-//! Hu Haixing
+//! Haixing Hu
 
 use super::error::{ArgumentError, ArgumentResult};
 
@@ -40,7 +40,7 @@ use super::error::{ArgumentError, ArgumentResult};
 ///
 /// # Author
 ///
-/// Hu Haixing
+/// Haixing Hu
 ///
 pub fn check_argument(condition: bool) -> ArgumentResult<()> {
     if !condition {
@@ -75,7 +75,7 @@ pub fn check_argument(condition: bool) -> ArgumentResult<()> {
 ///
 /// # Author
 ///
-/// Hu Haixing
+/// Haixing Hu
 ///
 pub fn check_argument_with_message(condition: bool, message: &str) -> ArgumentResult<()> {
     if !condition {
@@ -112,7 +112,7 @@ pub fn check_argument_with_message(condition: bool, message: &str) -> ArgumentRe
 ///
 /// # Author
 ///
-/// Hu Haixing
+/// Haixing Hu
 ///
 pub fn check_argument_fmt(condition: bool, message: String) -> ArgumentResult<()> {
     if !condition {
@@ -144,7 +144,7 @@ pub fn check_argument_fmt(condition: bool, message: String) -> ArgumentResult<()
 ///
 /// # Author
 ///
-/// Hu Haixing
+/// Haixing Hu
 ///
 pub fn check_state(condition: bool) -> ArgumentResult<()> {
     if !condition {
@@ -179,7 +179,7 @@ pub fn check_state(condition: bool) -> ArgumentResult<()> {
 ///
 /// # Author
 ///
-/// Hu Haixing
+/// Haixing Hu
 ///
 pub fn check_state_with_message(condition: bool, message: &str) -> ArgumentResult<()> {
     if !condition {
@@ -214,7 +214,7 @@ pub fn check_state_with_message(condition: bool, message: &str) -> ArgumentResul
 ///
 /// # Author
 ///
-/// Hu Haixing
+/// Haixing Hu
 ///
 pub fn check_bounds(offset: usize, length: usize, total_length: usize) -> ArgumentResult<()> {
     if offset > total_length {
@@ -257,7 +257,7 @@ pub fn check_bounds(offset: usize, length: usize, total_length: usize) -> Argume
 ///
 /// # Author
 ///
-/// Hu Haixing
+/// Haixing Hu
 ///
 pub fn check_element_index(index: usize, size: usize) -> ArgumentResult<usize> {
     if index >= size {
@@ -294,7 +294,7 @@ pub fn check_element_index(index: usize, size: usize) -> ArgumentResult<usize> {
 ///
 /// # Author
 ///
-/// Hu Haixing
+/// Haixing Hu
 ///
 pub fn check_position_index(index: usize, size: usize) -> ArgumentResult<usize> {
     if index > size {
@@ -330,7 +330,7 @@ pub fn check_position_index(index: usize, size: usize) -> ArgumentResult<usize> 
 ///
 /// # Author
 ///
-/// Hu Haixing
+/// Haixing Hu
 ///
 pub fn check_position_indexes(start: usize, end: usize, size: usize) -> ArgumentResult<()> {
     if start > end {

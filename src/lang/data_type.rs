@@ -12,7 +12,7 @@
 //!
 //! # Author
 //!
-//! Hu Haixing
+//! Haixing Hu
 
 use bigdecimal::BigDecimal;
 use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime, Utc};
@@ -89,7 +89,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// # Author
 ///
-/// Hu Haixing
+/// Haixing Hu
 ///
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum DataType {
@@ -288,7 +288,7 @@ impl std::fmt::Display for DataType {
 ///
 /// # Author
 ///
-/// Hu Haixing
+/// Haixing Hu
 ///
 pub trait DataTypeOf {
     /// The `DataType` corresponding to this Rust type

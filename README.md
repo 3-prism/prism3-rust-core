@@ -298,7 +298,7 @@ When contributing tests, note that achieving 100% region coverage is not always 
 
 ## Author
 
-**Hu Haixing** - *3-Prism Co. Ltd.*
+**Haixing Hu** - *3-Prism Co. Ltd.*
 
 ---
 

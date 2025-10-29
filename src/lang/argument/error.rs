@@ -12,7 +12,7 @@
 //!
 //! # Author
 //!
-//! Hu Haixing
+//! Haixing Hu
 
 use std::fmt;
 
@@ -37,7 +37,7 @@ use std::fmt;
 ///
 /// # Author
 ///
-/// Hu Haixing
+/// Haixing Hu
 ///
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ArgumentError {
@@ -114,6 +114,6 @@ impl From<&str> for ArgumentError {
 ///
 /// # Author
 ///
-/// Hu Haixing
+/// Haixing Hu
 ///
 pub type ArgumentResult<T> = Result<T, ArgumentError>;

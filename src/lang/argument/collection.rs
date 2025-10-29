@@ -12,7 +12,7 @@
 //!
 //! # Author
 //!
-//! Hu Haixing
+//! Haixing Hu
 
 use super::error::{ArgumentError, ArgumentResult};
 
@@ -64,7 +64,7 @@ use super::error::{ArgumentError, ArgumentResult};
 ///
 /// # Author
 ///
-/// Hu Haixing
+/// Haixing Hu
 ///
 pub trait CollectionArgument {
     /// Validate that the collection is not empty
@@ -330,7 +330,7 @@ impl<T> CollectionArgument for Vec<T> {
 ///
 /// # Author
 ///
-/// Hu Haixing
+/// Haixing Hu
 ///
 pub fn require_element_non_null<T>(name: &str, collection: &[Option<T>]) -> ArgumentResult<()> {
     for (index, item) in collection.iter().enumerate() {

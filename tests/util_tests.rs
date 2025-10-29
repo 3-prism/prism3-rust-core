@@ -12,6 +12,6 @@
 //!
 //! # Author
 //!
-//! Hu Haixing
+//! Haixing Hu
 
 mod util;

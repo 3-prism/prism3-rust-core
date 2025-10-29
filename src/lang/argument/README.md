@@ -1,6 +1,6 @@
 # Argument Validation Module
 
-Author: Hu Haixing
+Author: Haixing Hu
 
 ## Overview
 

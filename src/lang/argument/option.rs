@@ -12,7 +12,7 @@
 //!
 //! # Author
 //!
-//! Hu Haixing
+//! Haixing Hu
 
 use super::error::{ArgumentError, ArgumentResult};
 
@@ -35,7 +35,7 @@ use super::error::{ArgumentError, ArgumentResult};
 ///
 /// # Author
 ///
-/// Hu Haixing
+/// Haixing Hu
 ///
 /// # Examples
 ///
@@ -229,7 +229,7 @@ impl<T> OptionArgument<T> for Option<T> {
 ///
 /// # Author
 ///
-/// Hu Haixing
+/// Haixing Hu
 ///
 pub fn require_null_or<T, F>(
     name: &str,

@@ -136,7 +136,7 @@ cargo run --example util_demo
 
 ## 作者
 
-Hu Haixing
+Haixing Hu
 
 ## 版权
 

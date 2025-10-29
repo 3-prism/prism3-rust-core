@@ -12,7 +12,7 @@
 //!
 //! # Author
 //!
-//! Hu Haixing
+//! Haixing Hu
 
 use super::error::{ArgumentError, ArgumentResult};
 use regex::Regex;
@@ -36,7 +36,7 @@ use regex::Regex;
 ///
 /// # Author
 ///
-/// Hu Haixing
+/// Haixing Hu
 ///
 /// # Examples
 ///

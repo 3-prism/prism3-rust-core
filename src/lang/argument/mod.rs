@@ -58,7 +58,7 @@
 //!
 //! # Author
 //!
-//! Hu Haixing
+//! Haixing Hu
 
 pub mod collection;
 pub mod condition;

@@ -12,7 +12,7 @@
 //!
 //! # Author
 //!
-//! Hu Haixing
+//! Haixing Hu
 
 use super::error::{ArgumentError, ArgumentResult};
 use std::fmt::Display;
@@ -65,7 +65,7 @@ use std::fmt::Display;
 ///
 /// # Author
 ///
-/// Hu Haixing
+/// Haixing Hu
 ///
 pub trait NumericArgument: Sized {
     /// Validate that value is zero
@@ -573,7 +573,7 @@ where
 ///
 /// # Author
 ///
-/// Hu Haixing
+/// Haixing Hu
 pub fn require_equal<T>(name1: &str, value1: T, name2: &str, value2: T) -> ArgumentResult<()>
 where
     T: PartialEq + Display,
@@ -607,7 +607,7 @@ where
 ///
 /// # Author
 ///
-/// Hu Haixing
+/// Haixing Hu
 pub fn require_not_equal<T>(name1: &str, value1: T, name2: &str, value2: T) -> ArgumentResult<()>
 where
     T: PartialEq + Display,
