@@ -1,9 +1,9 @@
 [package]
 name = "prism3-core"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2021"
 rust-version = "1.70"
-authors = ["Hu Haixing <starfish.hu@gmail.com>"]
+authors = ["Haixing Hu <starfish.hu@gmail.com>"]
 license = "Apache-2.0"
 repository = "https://github.com/3-prism/prism3-rust-core"
 description = "Foundational utilities and language-level tools for Rust application development"
