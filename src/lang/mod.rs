@@ -12,11 +12,13 @@
 //!
 //! # Author
 //!
-//! Hu Haixing
+//! Haixing Hu
 
 pub mod argument;
+pub mod box_error;
 pub mod data_type;
 
+pub use box_error::{BoxError, BoxResult};
 pub use data_type::{DataType, DataTypeOf};
 
 // Re-export commonly used types

@@ -15,7 +15,7 @@
 //!
 //! # Author
 //!
-//! Hu Haixing
+//! Haixing Hu
 
 pub mod lang;
 pub mod util;
@@ -49,6 +49,7 @@ pub use lang::{
         // String functions
         StringArgument,
     },
+    box_error::{BoxError, BoxResult},
     data_type::{DataType, DataTypeOf},
 };
 
