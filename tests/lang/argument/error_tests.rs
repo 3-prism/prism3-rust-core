@@ -6,7 +6,10 @@
  *    All rights reserved.
  *
  ******************************************************************************/
-use prism3_core::{ArgumentError, ArgumentResult};
+use prism3_core::{
+    ArgumentError,
+    ArgumentResult,
+};
 
 #[test]
 fn argument_error_new_and_message() {

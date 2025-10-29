@@ -6,7 +6,10 @@
  *    All rights reserved.
  *
  ******************************************************************************/
-use prism3_core::{require_element_non_null, CollectionArgument};
+use prism3_core::{
+    require_element_non_null,
+    CollectionArgument,
+};
 
 #[test]
 fn non_empty_and_length_checks_slice() {

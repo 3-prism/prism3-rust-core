@@ -6,7 +6,12 @@
  *    All rights reserved.
  *
  ******************************************************************************/
-use prism3_core::{require_null_or, ArgumentError, ArgumentResult, OptionArgument};
+use prism3_core::{
+    require_null_or,
+    ArgumentError,
+    ArgumentResult,
+    OptionArgument,
+};
 
 #[test]
 fn require_non_null_and_and_validate_if_present() {
@@ -248,7 +253,10 @@ fn test_all_none_cases() {
 #[test]
 fn test_validate_if_present_validator_return() {
     // Ensure validator return value is handled correctly
-    use std::sync::atomic::{AtomicBool, Ordering};
+    use std::sync::atomic::{
+        AtomicBool,
+        Ordering,
+    };
     use std::sync::Arc;
 
     // Test that validator is actually called

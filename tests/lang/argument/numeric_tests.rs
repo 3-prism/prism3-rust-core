@@ -6,7 +6,11 @@
  *    All rights reserved.
  *
  ******************************************************************************/
-use prism3_core::{require_equal, require_not_equal, NumericArgument};
+use prism3_core::{
+    require_equal,
+    require_not_equal,
+    NumericArgument,
+};
 
 #[test]
 fn zero_and_non_zero() {

@@ -7,8 +7,14 @@
  *
  ******************************************************************************/
 use prism3_core::{
-    check_argument, check_argument_fmt, check_argument_with_message, check_bounds,
-    check_element_index, check_position_index, check_position_indexes, check_state,
+    check_argument,
+    check_argument_fmt,
+    check_argument_with_message,
+    check_bounds,
+    check_element_index,
+    check_position_index,
+    check_position_indexes,
+    check_state,
     check_state_with_message,
 };
 

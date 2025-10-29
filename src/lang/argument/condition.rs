@@ -14,7 +14,10 @@
 //!
 //! Haixing Hu
 
-use super::error::{ArgumentError, ArgumentResult};
+use super::error::{
+    ArgumentError,
+    ArgumentResult,
+};
 
 /// Check if an argument condition is true
 ///

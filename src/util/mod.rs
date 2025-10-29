@@ -16,4 +16,7 @@
 
 pub mod tuple;
 
-pub use tuple::{Pair, Triple};
+pub use tuple::{
+    Pair,
+    Triple,
+};

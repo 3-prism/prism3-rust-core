@@ -14,7 +14,10 @@
 //!
 //! Haixing Hu
 
-use super::error::{ArgumentError, ArgumentResult};
+use super::error::{
+    ArgumentError,
+    ArgumentResult,
+};
 use regex::Regex;
 
 /// String argument validation trait

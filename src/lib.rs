@@ -49,9 +49,18 @@ pub use lang::{
         // String functions
         StringArgument,
     },
-    box_error::{BoxError, BoxResult},
-    data_type::{DataType, DataTypeOf},
+    box_error::{
+        BoxError,
+        BoxResult,
+    },
+    data_type::{
+        DataType,
+        DataTypeOf,
+    },
 };
 
 // Re-export utility types
-pub use util::{Pair, Triple};
+pub use util::{
+    Pair,
+    Triple,
+};

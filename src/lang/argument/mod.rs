@@ -68,13 +68,32 @@ pub mod option;
 pub mod string;
 
 // Re-export main types and traits
-pub use collection::{require_element_non_null, CollectionArgument};
+pub use collection::{
+    require_element_non_null,
+    CollectionArgument,
+};
 pub use condition::{
-    check_argument, check_argument_fmt, check_argument_with_message, check_bounds,
-    check_element_index, check_position_index, check_position_indexes, check_state,
+    check_argument,
+    check_argument_fmt,
+    check_argument_with_message,
+    check_bounds,
+    check_element_index,
+    check_position_index,
+    check_position_indexes,
+    check_state,
     check_state_with_message,
 };
-pub use error::{ArgumentError, ArgumentResult};
-pub use numeric::{require_equal, require_not_equal, NumericArgument};
-pub use option::{require_null_or, OptionArgument};
+pub use error::{
+    ArgumentError,
+    ArgumentResult,
+};
+pub use numeric::{
+    require_equal,
+    require_not_equal,
+    NumericArgument,
+};
+pub use option::{
+    require_null_or,
+    OptionArgument,
+};
 pub use string::StringArgument;

@@ -14,7 +14,10 @@
 //!
 //! Haixing Hu
 
-use prism3_core::{Pair, Triple};
+use prism3_core::{
+    Pair,
+    Triple,
+};
 
 fn main() {
     println!("=== Pair Demo ===\n");

@@ -14,7 +14,10 @@
 //!
 //! Haixing Hu
 
-use super::error::{ArgumentError, ArgumentResult};
+use super::error::{
+    ArgumentError,
+    ArgumentResult,
+};
 
 /// # Collection Argument Validation Trait
 ///

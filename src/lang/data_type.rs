@@ -15,9 +15,18 @@
 //! Haixing Hu
 
 use bigdecimal::BigDecimal;
-use chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime, Utc};
+use chrono::{
+    DateTime,
+    NaiveDate,
+    NaiveDateTime,
+    NaiveTime,
+    Utc,
+};
 use num_bigint::BigInt;
-use serde::{Deserialize, Serialize};
+use serde::{
+    Deserialize,
+    Serialize,
+};
 
 /// Universal data type enumeration for cross-module type representation
 ///
